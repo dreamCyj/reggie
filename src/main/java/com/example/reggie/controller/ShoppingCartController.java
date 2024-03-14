@@ -1,10 +1,10 @@
 package com.example.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+
 import com.example.reggie.common.BaseContext;
 import com.example.reggie.common.Result;
-import com.example.reggie.entity.Category;
+
 import com.example.reggie.entity.ShoppingCart;
 import com.example.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +87,7 @@ public class ShoppingCartController {
     }
     @DeleteMapping("/clean")
     public Result<String> delete(){
+        log.info("清空购物车");
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
         shoppingCartService.remove(queryWrapper);
