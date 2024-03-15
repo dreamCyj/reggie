@@ -154,12 +154,7 @@ public class DishController {
         updateWrapper.in(Dish::getId, ids);
         updateWrapper.set(Dish::getStatus, 0);
         dishService.update(updateWrapper);
-        List<Dish> list = dishService.list(updateWrapper);
-        List<Long> categoryIds=list.stream().map(Dish::getCategoryId).toList();
-        for(long id : categoryIds){
-            String key = "dish_" + id + "_1";
-            redisTemplate.delete(key);
-        }
+        changeStatusWithRedis(updateWrapper);
         log.info("停售菜品");
         return Result.success("菜品已停售");
     }
@@ -182,19 +177,22 @@ public class DishController {
     }*/
     @PostMapping("/status/1")
     public Result<String> enable(@RequestParam List<Long> ids){
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Dish::getId, ids);
-        Dish dish = new Dish();
-        dish.setStatus(1);
-        dishService.update(dish, queryWrapper);
-        List<Dish> list = dishService.list(queryWrapper);
+        LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(Dish::getId, ids);
+        updateWrapper.set(Dish::getStatus, 1);
+        dishService.update(updateWrapper);
+        changeStatusWithRedis(updateWrapper);
+        log.info("启售菜品");
+        return Result.success("菜品已启售");
+    }
+
+    public void changeStatusWithRedis(LambdaUpdateWrapper<Dish> updateWrapper){
+        List<Dish> list = dishService.list(updateWrapper);
         List<Long> categoryIds=list.stream().map(Dish::getCategoryId).toList();
         for(long id : categoryIds){
             String key = "dish_" + id + "_1";
             redisTemplate.delete(key);
         }
-        log.info("启售菜品");
-        return Result.success("菜品已启售");
     }
 
 }
