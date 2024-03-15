@@ -1,6 +1,7 @@
 package com.example.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.reggie.common.Result;
@@ -88,6 +89,8 @@ public class DishController {
     public Result<DishDto> get(@PathVariable Long id){
         return Result.success(dishService.getByIdWithFlavor(id));
     }
+
+
     @PutMapping
     public Result<String> update(@RequestBody DishDto dishDto){
         dishService.updateWithFlavor(dishDto);
@@ -144,6 +147,54 @@ public class DishController {
             redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
             return Result.success(dishDtoList);
         }
+    }
+    @PostMapping("/status/0")
+    public Result<String> disable(@RequestParam List<Long> ids){
+        LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(Dish::getId, ids);
+        updateWrapper.set(Dish::getStatus, 0);
+        dishService.update(updateWrapper);
+        List<Dish> list = dishService.list(updateWrapper);
+        List<Long> categoryIds=list.stream().map(Dish::getCategoryId).toList();
+        for(long id : categoryIds){
+            String key = "dish_" + id + "_1";
+            redisTemplate.delete(key);
+        }
+        log.info("停售菜品");
+        return Result.success("菜品已停售");
+    }
+/*    @PostMapping("/status/0")
+    public Result<String> disable(@RequestParam List<Long> ids){
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+        Dish dish = new Dish();
+        dish.setStatus(0);
+        dishService.update(dish, queryWrapper);
+        //根据传来的菜品id 拿到种类id 根据种类清除缓存 这样状态改变也会更新到缓存
+        List<Dish> list = dishService.list(queryWrapper);
+        List<Long> categoryIds=list.stream().map(Dish::getCategoryId).toList();
+        for(long id : categoryIds){
+            String key = "dish_" + id + "_1";
+            redisTemplate.delete(key);
+        }
+        log.info("停售菜品");
+        return Result.success("菜品已停售");
+    }*/
+    @PostMapping("/status/1")
+    public Result<String> enable(@RequestParam List<Long> ids){
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+        Dish dish = new Dish();
+        dish.setStatus(1);
+        dishService.update(dish, queryWrapper);
+        List<Dish> list = dishService.list(queryWrapper);
+        List<Long> categoryIds=list.stream().map(Dish::getCategoryId).toList();
+        for(long id : categoryIds){
+            String key = "dish_" + id + "_1";
+            redisTemplate.delete(key);
+        }
+        log.info("启售菜品");
+        return Result.success("菜品已启售");
     }
 
 }
