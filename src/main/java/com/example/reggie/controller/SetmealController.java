@@ -103,6 +103,7 @@ public class SetmealController {
         return Result.success("套餐修改成功");
     }
     @PostMapping("/status/0")
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> disable(@RequestParam List<Long> ids){
         LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.in(Setmeal::getId, ids);
@@ -113,6 +114,7 @@ public class SetmealController {
     }
 
     @PostMapping("/status/1")
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> enable(@RequestParam List<Long> ids){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Setmeal::getId, ids);
