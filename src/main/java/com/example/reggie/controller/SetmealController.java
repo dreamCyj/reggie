@@ -17,6 +17,8 @@ import com.example.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,12 +78,14 @@ public class SetmealController {
      * @return
      */
     @PostMapping()
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> save(@RequestBody SetmealDto setmealDto){//前端传过来的是JSON，要加@RequestBody
         setmealService.saveWithDishes(setmealDto);
         return Result.success("套餐添加成功");
     }
 
     @DeleteMapping
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> delete(@RequestParam List<Long> ids){
         //Spring MVC获取参数不带注解的唯一要求就是参数名和Http请求参数名一致。这里前端传的是ids=176777...,141558...逗号分割而不是像之前page=1&pageSize=10，要加@RequestParam
         log.info("ids:{}", ids);
@@ -93,6 +97,7 @@ public class SetmealController {
         return Result.success(setmealService.getByIdWithDishes(id));
     }
     @PutMapping
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> update(@RequestBody SetmealDto setmealDto){
         setmealService.updateWithDishes(setmealDto);
         return Result.success("套餐修改成功");
@@ -118,6 +123,7 @@ public class SetmealController {
         return Result.success("套餐已启售");
     }
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status")
     public Result<List<Setmeal>> list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());

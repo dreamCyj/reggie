@@ -1,2 +1,6 @@
 reggie:
   path: D:\img\
+spring:
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存有效期 ms
