@@ -33,6 +33,7 @@ public class LoginCheckFilter implements Filter {
                 "/common/**",
                 "/user/sendMsg",
                 "/user/login"
+
         };
         //2.判断请求是否需要处理
         boolean check = check(urls, requestURI);
