@@ -1,13 +1,12 @@
 package com.example.reggie.config;
 
 import com.example.reggie.common.JacksonObjectMapper;
-import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 
 import java.util.List;
 @Slf4j
